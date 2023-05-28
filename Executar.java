@@ -26,7 +26,7 @@ public class Executar {
             g.atribuir();
             System.out.println(g);
             //g.direcoes();
-            //System.out.println(g.dijkstra());
+            System.out.println(g.dijkstra());
         }catch(FileNotFoundException e){
             System.out.print("Arquivo não encontrado");
         }

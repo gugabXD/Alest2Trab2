@@ -29,7 +29,7 @@ public class Grafo {
             case('.') -> nodo = new Node(true, 0);
             case('*') -> nodo = new Node(false, 0);
             default -> {
-                nodo = new Node(false, res-48);
+                nodo = new Node(true, res-48);
             }
 
         }
@@ -52,8 +52,8 @@ public class Grafo {
         int alt;
         for(Node n: nodos){
             n.distancia = 1000000000;
-            if(n.navegavel) aux.insert(n);
-            else if(n.valor==1) nodo = n;
+            if(n.valor==1) nodo = n;
+            else if(n.navegavel) aux.insert(n);
         }
         nodo.distancia = 0;
         int obj = 2;
@@ -65,15 +65,10 @@ public class Grafo {
                         if (alt < n.distancia) n.distancia = alt;
 
                     }
-                    if (n.valor == obj) {
-                        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                        alt = nodo.distancia + 1;
-                        if (alt < n.distancia) n.distancia = alt;
-                    }
                 }
             }
             aux.heapify();
-            aux.print();
+            //aux.print();
             nodo = aux.get();
         }
         return valor(2);
@@ -94,9 +89,9 @@ public class Grafo {
         for(int i=0; i<nodos.size(); i++){
             if(i%colunas==0 && i!=0) s+="\n";
             Node nodo = nodos.get(i);
-            if(nodo.navegavel) s+=".";
+            if(!nodo.navegavel) s+="*";
             else if(nodo.valor!=0) s+=nodo.valor;
-            else s+="*";
+            else s+=".";
         }
         return s;
     }
