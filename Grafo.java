@@ -47,31 +47,42 @@ public class Grafo {
     }
 
     public int dijkstra(){
+        int dist = 0, obj=1, res;
         Heap aux = new Heap(nodos.size());
         Node nodo=null;
         int alt;
-        for(Node n: nodos){
-            n.distancia = 1000000000;
-            if(n.valor==1) nodo = n;
-            else if(n.navegavel) aux.insert(n);
-        }
-        nodo.distancia = 0;
-        int obj = 2;
-        while(!aux.isEmpty()) {
-            for (Node n : nodo.direcoes) {
-                if(n!=null) {
-                    if (aux.existe(n)) {
-                        alt = nodo.distancia + 1;
-                        if (alt < n.distancia) n.distancia = alt;
+        for(int i = 1; i<=9; i++) {
+            for (Node n : nodos) {
+                n.distancia = 1000000000;
+                if (n.valor == i) nodo = n;
+                else if (n.navegavel) aux.insert(n);
+            }
+            nodo.distancia = 0;
+            obj++;
+            if(obj==10) obj = 1;
+            while (!aux.isEmpty()) {
+                for (Node n : nodo.direcoes) {
+                    if (n != null) {
+                        if (aux.existe(n)) {
+                            alt = nodo.distancia + 1;
+                            if (alt < n.distancia) n.distancia = alt;
 
+                        }
                     }
                 }
+                aux.heapify();
+                //aux.print();
+                nodo = aux.get();
+                res = valor(obj);
+                if(res==1000000000) i--;
+                else {
+                    dist+=res;
+                    System.out.println(res);
+                }
             }
-            aux.heapify();
-            //aux.print();
-            nodo = aux.get();
+
         }
-        return valor(2);
+        return dist;
     }
 //C:\Users\User\Desktop\teste.txt
     public int valor(int valor){
