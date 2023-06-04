@@ -23,7 +23,7 @@ public class Executar {
                 ler(line);
                 line = leitor.readLine();
             }
-            System.out.println(g);
+            //System.out.println(g);
             System.out.println(g.dijkstra());
         }catch(FileNotFoundException e){
             System.out.print("Arquivo não encontrado");
