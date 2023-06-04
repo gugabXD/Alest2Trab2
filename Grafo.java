@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class Grafo {
 
@@ -57,7 +55,7 @@ public class Grafo {
     }
     private int dijkstra(int saida, int destino) {
         int res;
-        Heap aux = new Heap(linhas*colunas);
+        Queue<Node> aux = new LinkedList();
         Node nodo = null;
         int alt, posicao, nlinha, ncoluna;
         for (int j = 0; j < linhas * colunas; j++) {
@@ -70,7 +68,7 @@ public class Grafo {
             }
         }
         nodo.distancia = 0;
-        aux.put(nodo);
+        aux.add(nodo);
         System.out.print(" " + saida + " " + destino + " ");
         while (nodo != null) {
             posicao = nodo.posicao;
@@ -81,7 +79,7 @@ public class Grafo {
                 Node oeste = nodos[nlinha][ncoluna - 1];
                 if (alt < oeste.distancia && oeste.navegavel) {
                     oeste.distancia = alt;
-                    aux.put(oeste);
+                    aux.add(oeste);
                 }
             }
             if (ncoluna < colunas - 1) {
@@ -89,7 +87,7 @@ public class Grafo {
                 Node leste = nodos[nlinha][ncoluna + 1];
                 if (alt < leste.distancia && leste.navegavel) {
                     leste.distancia = alt;
-                    aux.put(leste);
+                    aux.add(leste);
                 }
             }
             if (nlinha > 0) {
@@ -97,7 +95,7 @@ public class Grafo {
                 Node norte = nodos[nlinha - 1][ncoluna];
                 if (alt < norte.distancia && norte.navegavel) {
                     norte.distancia = alt;
-                    aux.put(norte);
+                    aux.add(norte);
                 }
 
             }
@@ -106,10 +104,10 @@ public class Grafo {
                 Node sul = nodos[nlinha + 1][ncoluna];
                 if (alt < sul.distancia && sul.navegavel) {
                     sul.distancia = alt;
-                    aux.put(sul);
+                    aux.add(sul);
                 }
             }
-            nodo = aux.get();
+            nodo = aux.poll();
         }
         res = valor(destino);
         System.out.println(res);
@@ -126,165 +124,4 @@ public class Grafo {
             }
             return -1;
         }
-
-
-
-
-
-
-
-
-
-
-
-
-    private class Heap {
-
-        private Node v[];
-        private int used;
-
-        public Heap(int quant) {
-            used = 0;
-            v = new Node[quant];
-        }
-
-        private int left ( int i )   { return 2 * i + 1; }
-        private int right ( int i )  { return 2 * i + 2; }
-        private int parent ( int i ) { return (i-1) / 2; }
-
-        public boolean isEmpty(){
-            return used==0;
-        }
-        public boolean existe(Node n){
-            if(n==null) return false;
-            for(Node nodo: v){
-                if(nodo==n) return true;
-            }
-            return false;
-        }
-        private void sift_up ( int pos ) {
-            //if(pos==0) return;
-            int parent = parent(pos);
-            if(v[pos].distancia<v[parent].distancia) {
-                Node temp = v[parent];
-                v[parent]=v[pos];
-                v[pos] = temp;
-                sift_up(parent);
-            }
-            //sift_up(parent);
-        }
-
-        public void put( Node data ) {
-            v[used] = data;
-            sift_up( used );
-            used++;
-        }
-
-        public void insert(Node data){
-            v[used] = data;
-            used++;
-        }
-
-        public void heapify(){
-            for(int i = parent(used-1); i>=0; i--){
-                sift_down(i);
-            }
-        }
-
-        public void sort(){
-            int i; int oldsize = used;
-            Node temp;
-            for(i=0; i<oldsize; i++){
-                used--;
-                temp = v[0];
-                v[0] = v[used];
-                v[used] = temp;
-                sift_down(0);
-            }
-            used = oldsize;
-        }
-
-        private void sift_down ( int pos ) {
-            int left = left(pos);
-            int right = right(pos);
-            Node temp;
-            if(left>=used) return;
-            if(left==used-1){
-                if(v[pos].distancia>v[left].distancia) {
-                    temp = v[pos];
-                    v[pos] = v[left];
-                    v[left] = temp;
-                }
-                return;
-            }
-            if(v[left].distancia<v[right].distancia){
-                if(v[pos].distancia>v[left].distancia){
-                    temp = v[pos];
-                    v[pos] = v[left];
-                    v[left] = temp;
-                    sift_down(left);
-                }
-            }
-            else{
-                if(v[pos].distancia>v[right].distancia){
-                    temp = v[pos];
-                    v[pos] = v[right];
-                    v[right] = temp;
-                    sift_down(right);
-                }
-            }
-        }
-        public Node get( ) {
-            if(used==0) return null;
-            Node res = v[0];
-            v[0] = v[--used];
-            sift_down( 0 );
-            return res;
-        }
-
-        private int len( int a ) {
-            int res = 0;
-            while ( a > 0 ) {
-                res++;
-                a /= 10;
-            }
-            return res;
-        }
-
-        private void print( int b, int elem, int sp )  {
-            int i, j;
-
-            System.out.println( "" );
-            for( j = 0; j < used; j++ ) {
-                if(!v[j].navegavel) System.out.print("* ");
-                else if(v[j].valor!=0) System.out.print(v[j].valor+" ");
-                else System.out.print(". ");
-            }
-            System.out.println( "" );
-
-            while ( true ) {
-                for( j = 0; j <= sp / 2; j++ ) System.out.print( " " );
-                for( i = b; i < b + elem; i++ ) {
-                    if ( i == used ) return;
-                    int aux = len(v[i].valor);
-                    if(!v[i].navegavel) System.out.print("* ");
-                    else if(v[i].valor!=0) System.out.print(v[i].valor+" ");
-                    else System.out.print(". ");
-                    System.out.print(v[i].posicao+" ");
-                    for( j = 0; j < sp - aux; j++ ) System.out.print( " " );
-                }
-                System.out.println( "" );
-                b = b + elem;
-                elem = 2 * elem;
-                sp = sp / 2;
-            }
-        }
-
-        public void print( )  {
-            System.out.println( "" );
-            print( 0, 1, 64 );
-            System.out.println( "" );
-        }
-        }
-
 }
