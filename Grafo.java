@@ -44,7 +44,7 @@ public class Grafo {
                 nodo = new Node(true, res-48, posicao, Integer.MAX_VALUE);
             }
         }
-        nodos[posicao/colunas][posicao%colunas]= nodo;
+        nodos[posicao/colunas][posicao%colunas] = nodo;
         posicao++;
     }
 
@@ -81,20 +81,14 @@ public class Grafo {
             nodo.distancia = 0;
             aux.offer(nodo);
             System.out.print(" "+saida+" "+destino+" ");
-            Set<String> visto = new HashSet<>();
-            while(!aux.isEmpty()){
+            while(nodo!=null){
                 posicao = nodo.posicao;
                 nlinha = posicao/colunas;
                 ncoluna = posicao%colunas;
-                String key = nlinha +"/"+ncoluna;
-                if(visto.contains(nodo.key) && nodo.valor!=saida){
-                    continue;
-                }
-                visto.add(nodo.key);
                 if(ncoluna>0) {
                     alt = nodo.distancia+1;
                     Node oeste = nodos[nlinha][ncoluna-1];
-                    if(alt<oeste.distancia)
+                    if(alt<oeste.distancia && oeste.navegavel)
                         {
                             oeste.distancia=alt;
                             aux.offer(oeste);
@@ -103,26 +97,26 @@ public class Grafo {
                 if(ncoluna<colunas-1) {
                     alt = nodo.distancia+1;
                     Node leste = nodos[nlinha][ncoluna+1];
-                    if(alt<leste.distancia){
+                    if(alt<leste.distancia && leste.navegavel){
                         leste.distancia=alt;
                         aux.offer(leste);
                     }
                 }
                 if(nlinha>0) {
                     alt = nodo.distancia+1;
-                    Node sul = nodos[nlinha-1][ncoluna];
-                    if(alt<sul.distancia) {
-                        sul.distancia=alt;
-                        aux.offer(sul);
+                    Node norte = nodos[nlinha-1][ncoluna];
+                    if(alt<norte.distancia && norte.navegavel) {
+                        norte.distancia=alt;
+                        aux.offer(norte);
                     }
 
                 }
                 if(nlinha<linhas-1) {
                     alt = nodo.distancia + 1;
-                    Node norte = nodos[nlinha + 1][ncoluna];
-                    if (alt < norte.distancia) {
-                        norte.distancia = alt;
-                        aux.offer(norte);
+                    Node sul = nodos[nlinha+1][ncoluna];
+                    if (alt < sul.distancia && sul.navegavel) {
+                        sul.distancia = alt;
+                        aux.offer(sul);
                     }
                 }
                 nodo = aux.poll();
@@ -131,6 +125,78 @@ public class Grafo {
         System.out.println(res);
         return res;
         }
+    /*public int dijkstraTest(int saida, int destino){
+        int res;
+        PriorityQueue<Node> aux = new PriorityQueue<>(Comparator.comparingInt(nodo -> nodo.distancia));
+        Node nodo=null;
+        int alt, posicao, nlinha, ncoluna;
+        for (int j = 0; j < linhas * colunas; j++) {
+            Node n = nodos[j / colunas][j % colunas];
+            if(n.valor==saida) {
+                nodo = n;
+            }
+            if (n.navegavel) {
+                n.distancia = Integer.MAX_VALUE;
+            }
+        }
+        nodo.distancia = 0;
+        aux.offer(nodo);
+        System.out.println(" "+saida+" "+destino+" ");
+        Set<String> visto = new HashSet<>();
+        while(true){
+            if(nodo==null) break;
+            posicao = nodo.posicao;
+            nlinha = posicao/colunas;
+            ncoluna = posicao%colunas;
+            if(visto.contains(nodo.key) && nodo.valor!=saida){
+                continue;
+            }
+            visto.add(nodo.key);
+            if(ncoluna>0) {
+                alt = nodo.distancia+1;
+                Node oeste = nodos[nlinha][ncoluna-1];
+                if(alt<oeste.distancia && oeste.navegavel)
+                {
+                    oeste.distancia=alt;
+                    aux.offer(oeste);
+                    System.out.println(oeste.posicao);
+                }
+            }
+            if(ncoluna<colunas-1) {
+                alt = nodo.distancia+1;
+                Node leste = nodos[nlinha][ncoluna+1];
+                if(alt<leste.distancia && leste.navegavel){
+                    leste.distancia=alt;
+                    aux.offer(leste);
+                    System.out.println(leste.posicao);
+                }
+            }
+            if(nlinha>0) {
+                alt = nodo.distancia+1;
+                Node norte = nodos[nlinha-1][ncoluna];
+                if(alt<norte.distancia && norte.navegavel) {
+                    norte.distancia=alt;
+                    aux.offer(norte);
+                    System.out.println(norte.posicao);
+                }
+
+            }
+            if(nlinha<linhas-1) {
+                alt = nodo.distancia + 1;
+                Node sul = nodos[nlinha + 1][ncoluna];
+                if (alt < sul.distancia && sul.navegavel) {
+                    sul.distancia = alt;
+                    aux.offer(sul);
+                    System.out.println(sul.posicao);
+                }
+            }
+            nodo = aux.poll();
+            direcoes(nlinha,ncoluna);
+        }
+        res = valor(destino);
+        System.out.println(res);
+        return res;
+    }*/
 
         public int valor(int objetivo){
             for(Node n[]: nodos){
@@ -143,6 +209,13 @@ public class Grafo {
 
 //C:\Users\User\Desktop\teste.txt
 
+    public void direcoes(int linha, int coluna){
+        System.out.println("NODO:"+nodos[linha][coluna]+" POSICAO:"+nodos[linha][coluna].posicao);
+        if(linha>0)System.out.print("N:"+nodos[linha-1][coluna].posicao);
+        if(linha<linhas-1)System.out.print("/S:"+nodos[linha+1][coluna].posicao);
+        if(coluna<colunas-1)System.out.print("/L:"+nodos[linha][coluna+1].posicao);
+        if(coluna>0)System.out.println("/O:"+nodos[linha][coluna-1].posicao);
+    }
     public String toString(){
         String s = "";
         for(int i=0; i<linhas*colunas; i++){
