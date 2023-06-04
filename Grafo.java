@@ -1,25 +1,27 @@
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+
 public class Grafo {
 
-    private ArrayList<Node> nodos;
+    private Node[][] nodos;
     int linhas, colunas, posicao;
 
     public Grafo(int linhas, int colunas){
-        nodos = new ArrayList<>();
+        nodos = new Node[linhas][colunas];
         this.linhas = linhas;
         this.colunas = colunas;
     }
     private class Node{
-        private Node[] direcoes;
         private boolean navegavel;
         private int valor;
         private int posicao;
 
         private int distancia;
-        public Node(boolean navegavel, int valor, int posicao){
+        public Node(boolean navegavel, int valor, int posicao, int distancia){
             this.navegavel = navegavel;
             this.valor = valor;
-            direcoes = new Node[4];
+            this.distancia = distancia;
             this.posicao = posicao;
         }
 
@@ -28,166 +30,102 @@ public class Grafo {
     public void createNodo(char res){
         Node nodo;
         switch(res){
-            case('.') -> nodo = new Node(true, 0, posicao);
-            case('*') -> nodo = new Node(false, 0, posicao);
+            case('.') -> nodo = new Node(true, 0, posicao, Integer.MAX_VALUE);
+            case('*') -> nodo = new Node(false, 0, posicao, Integer.MAX_VALUE);
             default -> {
-                nodo = new Node(true, res-48, posicao);
+                nodo = new Node(true, res-48, posicao, Integer.MAX_VALUE);
             }
         }
+        nodos[posicao/colunas][posicao%colunas]= nodo;
         posicao++;
-        nodos.add(nodo);
     }
-
-    public void atribuir(){
-        for(int i=0; i<linhas*colunas; i++){
-            Node n = nodos.get(i);
-            if(i>colunas-1) n.direcoes[0] = nodos.get(i-colunas);
-            if(i%colunas!=0) n.direcoes[3] = nodos.get(i-1);
-            if(i%colunas!=(colunas-1)) n.direcoes[2] = nodos.get(i+1);
-            if(i/colunas!=(linhas-1)) n.direcoes[1] = nodos.get(i+colunas);
-        }
-    }
-
     public int dijkstra(){
-        int dist = 0, obj=1, res;
-        Heap aux = new Heap(nodos.size());
-        Node nodo=null;
-        int alt;
-        for(int i = 1; i<=9; i++) {
-            for (Node n : nodos) {
-                n.distancia = 1000000000;
-                if (n.valor == i) nodo = n;
-                else if (n.navegavel) aux.insert(n);
+        int dist=0,saida, destino=2, res, bloqueado=-1;
+        for(saida=1; saida<=9; saida++) {
+            if(saida==bloqueado) saida++;
+            res = dijkstra(saida, destino);
+            if(res<Integer.MAX_VALUE) dist += res;
+            else{
+                saida--;
+                bloqueado = destino;
             }
-            nodo.distancia = 0;
-            obj++;
-            if(obj==10) obj = 1;
-            System.out.print(" "+i+" "+obj+" ");
-            while (!aux.isEmpty()) {
-                for (Node n : nodo.direcoes) {
-                    if (n != null) {
-                        if (aux.existe(n)) {
-                            alt = nodo.distancia + 1;
-                            if (alt < n.distancia) n.distancia = alt;
-                        }
-                    }
-                }
-                aux.heapify();
-                //aux.print();
-                nodo = aux.get();
-                if(nodo.distancia>10000000) break;
-            }
-                res = valor(obj);
-                if(res>10000000) i--;
-                else {
-                    dist+=res;
-                    System.out.println(res);
-                }
-                if(obj==1) break;
-            }
-            return dist;
+            if(destino==1) break;
+            destino++;
+            if(destino==10) destino=1;
         }
-        
-       /*  public int dijkstra(){
-            Heap aux = new Heap(nodos.size());
-            Node nodo=null;
-            int alt;
-            for(Node n: nodos){
-                n.distancia = 1000000000;
-                if(n.valor==8) nodo = n;
-                else if(n.navegavel) aux.insert(n);
+        return dist;
+    }
+    private int dijkstra(int saida, int destino) {
+        int res;
+        Heap aux = new Heap(linhas*colunas);
+        Node nodo = null;
+        int alt, posicao, nlinha, ncoluna;
+        for (int j = 0; j < linhas * colunas; j++) {
+            Node n = nodos[j / colunas][j % colunas];
+            if (n.valor == saida) {
+                nodo = n;
             }
-            nodo.distancia = 0;
-           // System.out.println("NODO PEGO: "+nodo.posicao);
-            int obj = 9;
-            while(!aux.isEmpty()) {
-                for (Node n : nodo.direcoes) {
-                    if(n!=null) {
-                        if (aux.existe(n)) {
-                            //System.out.println("FILHO: "+n.posicao);
-                            alt = nodo.distancia + 1;
-                            if (alt < n.distancia) n.distancia = alt;
-    
-                        }
-                    }
+            if (n.navegavel) {
+                n.distancia = Integer.MAX_VALUE;
+            }
+        }
+        nodo.distancia = 0;
+        aux.put(nodo);
+        System.out.print(" " + saida + " " + destino + " ");
+        while (nodo != null) {
+            posicao = nodo.posicao;
+            nlinha = posicao / colunas;
+            ncoluna = posicao % colunas;
+            if (ncoluna > 0) {
+                alt = nodo.distancia + 1;
+                Node oeste = nodos[nlinha][ncoluna - 1];
+                if (alt < oeste.distancia && oeste.navegavel) {
+                    oeste.distancia = alt;
+                    aux.put(oeste);
                 }
-                aux.heapify();
-                //aux.print();
-                nodo = aux.get();
-                //System.out.println("PROX NODO: " +nodo.posicao);
-                if(nodo.distancia==1000000000) break;
             }
-            return valor(obj);
-        }*/
+            if (ncoluna < colunas - 1) {
+                alt = nodo.distancia + 1;
+                Node leste = nodos[nlinha][ncoluna + 1];
+                if (alt < leste.distancia && leste.navegavel) {
+                    leste.distancia = alt;
+                    aux.put(leste);
+                }
+            }
+            if (nlinha > 0) {
+                alt = nodo.distancia + 1;
+                Node norte = nodos[nlinha - 1][ncoluna];
+                if (alt < norte.distancia && norte.navegavel) {
+                    norte.distancia = alt;
+                    aux.put(norte);
+                }
+
+            }
+            if (nlinha < linhas - 1) {
+                alt = nodo.distancia + 1;
+                Node sul = nodos[nlinha + 1][ncoluna];
+                if (alt < sul.distancia && sul.navegavel) {
+                    sul.distancia = alt;
+                    aux.put(sul);
+                }
+            }
+            nodo = aux.get();
+        }
+        res = valor(destino);
+        System.out.println(res);
+        return res;
+    }
+
 
 //C:\Users\User\Desktop\teste.txt
-    public int valor(int valor){
-        for(Node n: nodos){
-            if(n.valor == valor){
-                return n.distancia;
-            }
-        }
-        return -1;
-    }
-
-
-    public String toString(){
-        String s = "";
-        for(int i=0; i<nodos.size(); i++){
-            if(i%colunas==0 && i!=0) s+="\n";
-            Node nodo = nodos.get(i);
-            if(!nodo.navegavel) s+="*";
-            else if(nodo.valor!=0) s+=nodo.valor;
-            else s+=".";
-        }
-        printPosicoes();
-        return s;
-    }
-
-    public void printPosicoes(){
-    for(int i=0; i<nodos.size(); i++){
-        if(i%colunas==0 && i!=0) System.out.println();;
-        System.out.print(i+"/");
-        Node nodo = nodos.get(i);
-        if(!nodo.navegavel) System.out.print("*");
-        else if(nodo.valor!=0) System.out.print(nodo.valor);
-        else System.out.print(".");
-        System.out.print(" ");
-        if(i<10) System.out.print(" ");
-    }
-    System.out.println();
-}
-    public void direcoes(){
-        int i = 0;
-        for(Node n: nodos){
-            System.out.print("-");
-            if (!n.navegavel) System.out.print("*");
-            else if (n.valor != 0) System.out.print(n.valor);
-            else System.out.print(".");
-            System.out.print("/"+n.posicao);
-            System.out.println("-");
-            for(Node nodo: n.direcoes){
-                switch(i){
-                    case 0-> System.out.print(" N");
-                    case 1-> System.out.print(" S");
-                    case 2-> System.out.print(" L");
-                    case 3-> System.out.print(" O");
+        public int valor(int objetivo){
+            for(Node n[]: nodos){
+                for(Node nodo: n){
+                    if(nodo.valor==objetivo) return nodo.distancia;
                 }
-                if(nodo!=null) {
-                    if (!nodo.navegavel) System.out.print("*");
-                    else if (nodo.valor != 0) System.out.print(nodo.valor);
-                    else System.out.print(".");
-                }
-                i++;
             }
-            System.out.println();
-            System.out.println();
-            i=0;
+            return -1;
         }
-    }
-
-
-
 
 
 
@@ -297,6 +235,7 @@ public class Grafo {
             }
         }
         public Node get( ) {
+            if(used==0) return null;
             Node res = v[0];
             v[0] = v[--used];
             sift_down( 0 );
