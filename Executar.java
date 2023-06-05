@@ -3,10 +3,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Scanner;
 
+import static java.lang.System.nanoTime;
+
 public class Executar {
 
     private Grafo g;
     public void leitor(){
+        double start = nanoTime();
         int linha, coluna;
         BufferedReader leitor;
         Scanner in = new Scanner(System.in);
@@ -23,10 +26,11 @@ public class Executar {
                 ler(line);
                 line = leitor.readLine();
             }
-            g.atribuir();
-            System.out.println(g);
-            //g.direcoes();
+            //System.out.println(g);
             System.out.println(g.dijkstra());
+            double end = nanoTime();
+            double tempo = (end-start)/1000000000;
+            System.out.println("Tempo de execução: "+tempo+"s");
         }catch(FileNotFoundException e){
             System.out.print("Arquivo não encontrado");
         }
